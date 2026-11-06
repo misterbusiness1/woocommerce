@@ -1,12 +1,14 @@
 /**
  * External dependencies
  */
+import { Fragment } from '@wordpress/element';
 import { Card, Text } from '@wordpress/ui';
 
 /**
  * Internal dependencies
  */
 import type { FixFirst as FixFirstData } from '../types';
+import { trackReadiness, type Surface } from '../tracks';
 import { Row, RowLink } from './check-row';
 
 /**
@@ -15,49 +17,57 @@ import { Row, RowLink } from './check-row';
  */
 export const FixFirstList = ( {
 	items,
+	surface,
 }: {
 	items: FixFirstData[ 'items' ];
+	surface: Surface;
 } ) => {
 	let lastTier: string | null = null;
 	return (
 		<ol className="wc-sales-readiness-list">
-			{ items.map( ( item ) => {
+			{ items.map( ( item, index ) => {
 				const heading = item.tier !== lastTier ? item.tier : null;
 				lastTier = item.tier;
 				return (
-					<li
-						key={ item.title }
-						className="wc-sales-readiness-list__group"
-					>
+					<Fragment key={ item.id }>
 						{ heading && (
-							<Text
-								variant="heading-sm"
+							<li
 								className="wc-sales-readiness-tier"
 								aria-hidden="true"
 							>
-								{ heading }
-							</Text>
+								<Text variant="heading-sm">{ heading }</Text>
+							</li>
 						) }
-						<ul className="wc-sales-readiness-list">
-							<Row
-								title={ item.title }
-								badge={ item.impact }
-								action={
-									item.link && <RowLink link={ item.link } />
-								}
-								srState={ item.tier + ':' }
-							>
-								{ item.why && (
-									<Text
-										variant="body-sm"
-										className="wc-sales-readiness__muted"
-									>
-										{ item.why }
-									</Text>
-								) }
-							</Row>
-						</ul>
-					</li>
+						<Row
+							title={ item.title }
+							badge={ item.impact }
+							action={
+								item.link && (
+									<RowLink
+										link={ item.link }
+										onClick={ () =>
+											trackReadiness( 'link_click', {
+												surface,
+												area: 'fix_first',
+												check_id: item.id,
+												position: index + 1,
+											} )
+										}
+									/>
+								)
+							}
+							srState={ item.tier + ':' }
+						>
+							{ item.why && (
+								<Text
+									variant="body-sm"
+									className="wc-sales-readiness__muted"
+								>
+									{ item.why }
+								</Text>
+							) }
+						</Row>
+					</Fragment>
 				);
 			} ) }
 		</ol>
@@ -78,7 +88,7 @@ export const FixFirstCard = ( { fixFirst }: { fixFirst: FixFirstData } ) => (
 			<Text variant="body-md" className="wc-sales-readiness__muted">
 				{ fixFirst.ranking }
 			</Text>
-			<FixFirstList items={ fixFirst.items } />
+			<FixFirstList items={ fixFirst.items } surface="page" />
 		</Card.Content>
 	</Card.Root>
 );
