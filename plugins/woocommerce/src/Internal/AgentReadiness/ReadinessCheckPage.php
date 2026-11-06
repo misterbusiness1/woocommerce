@@ -486,7 +486,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		$rows     = array();
 		foreach ( $failing as $check ) {
 			$issue  = self::product_issue( $check, $channels );
-			$rows[] = self::row( 'open', $issue['title'], $issue['why'], $issue['fix'], self::products_link( (int) $check['count'], (string) ( $check['id'] ?? '' ), $linked ) );
+			$rows[] = self::row( (string) ( $check['id'] ?? '' ), 'open', $issue['title'], $issue['why'], $issue['fix'], self::products_link( (int) $check['count'], (string) ( $check['id'] ?? '' ), $linked ) );
 		}
 		$listed = array();
 		foreach ( $channels as $channel_id => $channel ) {
@@ -512,6 +512,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	/**
 	 * One check row for the React views.
 	 *
+	 * @param string                              $id      The check's id, for tracking.
 	 * @param string                              $state   open, required, unknown or pass.
 	 * @param string                              $title   Title: what to do while it fails.
 	 * @param string                              $text    Why it matters, and what was found while it fails.
@@ -521,8 +522,9 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 * @param array{href:string,text:string}|null $seen_at The page a conflict was seen on.
 	 * @return array<string, mixed>
 	 */
-	private static function row( string $state, string $title, string $text, string $fix = '', ?array $link = null, ?array $badge = null, ?array $seen_at = null ): array {
+	private static function row( string $id, string $state, string $title, string $text, string $fix = '', ?array $link = null, ?array $badge = null, ?array $seen_at = null ): array {
 		return array(
+			'id'      => $id,
 			'state'   => $state,
 			'title'   => $title,
 			'badge'   => null === $badge ? null : self::badge_data( $badge ),
@@ -540,7 +542,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 *
 	 * @param array<int, array{id:string,ok:bool|null,blocks:string,group?:string,level:string,name:string,label?:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:bool,seen_at?:string}> $checks Store checks shown on the page.
 	 * @param array<string, mixed>                                                                                                                                                                           $report Stored report.
-	 * @return array<int, array{tier:int,title:string,why:string,impact:array{0:string,1:string}|null,link:array{href:string,text:string}|null,share:float|null,count:int}>
+	 * @return array<int, array{id:string,tier:int,title:string,why:string,impact:array{0:string,1:string}|null,link:array{href:string,text:string}|null,share:float|null,count:int}>
 	 */
 	private function fix_first_items( array $checks, array $report ): array {
 		$required = array();
@@ -558,6 +560,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				continue;
 			}
 			$item = array(
+				'id'     => $check['id'],
 				'tier'   => $is_required ? 0 : ( $every_sale ? 1 : 2 ),
 				'title'  => $copy['title'],
 				'why'    => $copy['text'],
@@ -581,6 +584,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			$count          = (int) $check['count'];
 			$issue          = self::product_issue( $check, $channels );
 			$issues[]       = array(
+				'id'     => (string) ( $check['id'] ?? '' ),
 				'tier'   => $blocks_listing ? 2 : 3,
 				'title'  => $issue['title'],
 				'why'    => $issue['why'],
@@ -607,7 +611,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 *
 	 * @param array<int, array{id:string,ok:bool|null,blocks:string,group?:string,level:string,name:string,label?:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:bool,seen_at?:string}> $checks Store checks shown on the page.
 	 * @param array<string, mixed>                                                                                                                                                                           $report Stored report.
-	 * @return array{title:string,ranking:string,items:array<int, array{tier:string,title:string,why:string,impact:array{intent:string,text:string}|null,link:array{href:string,text:string}|null}>}|null
+	 * @return array{title:string,ranking:string,items:array<int, array{id:string,tier:string,title:string,why:string,impact:array{intent:string,text:string}|null,link:array{href:string,text:string}|null}>}|null
 	 */
 	private function fix_first( array $checks, array $report ): ?array {
 		$items = $this->fix_first_items( $checks, $report );
@@ -631,6 +635,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				$first = false;
 			}
 			$list[] = array(
+				'id'     => $item['id'],
 				'tier'   => $tiers[ $item['tier'] ],
 				'title'  => $item['title'],
 				'why'    => $why,
@@ -899,12 +904,12 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		foreach ( $checks as $check ) {
 			$copy = self::is_setup_step( $check ) ? null : ReadinessCopy::store_check( $check['id'] );
 			if ( null === $check['ok'] ) {
-				$rows[] = self::row( 'unknown', $copy['title'] ?? $check['name'], $launched ? __( 'This couldn\'t be checked. The next check tries again.', 'woocommerce' ) : __( 'Launch your store to run this check.', 'woocommerce' ) );
+				$rows[] = self::row( $check['id'], 'unknown', $copy['title'] ?? $check['name'], $launched ? __( 'This couldn\'t be checked. The next check tries again.', 'woocommerce' ) : __( 'Launch your store to run this check.', 'woocommerce' ) );
 				continue;
 			}
 			if ( $check['ok'] ) {
 				// A setup step's why describes the failure, so a passed one shows only its name, as in Status.
-				$rows[] = self::row( 'pass', $copy['title'] ?? $check['name'], $copy['why'] ?? '' );
+				$rows[] = self::row( $check['id'], 'pass', $copy['title'] ?? $check['name'], $copy['why'] ?? '' );
 				continue;
 			}
 			$failing  = self::failing_copy( $check );
@@ -919,7 +924,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				)
 				: null;
 			$badge    = $required ? self::required_badge() : ( $conflict ? array( 'off', __( 'Likely conflict', 'woocommerce' ) ) : null );
-			$rows[]   = self::row( $required ? 'required' : 'open', $failing['title'], $failing['text'], $failing['fix'], self::fix_link( $failing['url'] ), $badge, $seen_at );
+			$rows[]   = self::row( $check['id'], $required ? 'required' : 'open', $failing['title'], $failing['text'], $failing['fix'], self::fix_link( $failing['url'] ), $badge, $seen_at );
 		}
 		return $rows;
 	}
