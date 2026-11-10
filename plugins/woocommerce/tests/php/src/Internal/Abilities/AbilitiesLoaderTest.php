@@ -42,6 +42,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/product-delete',
 		'woocommerce/orders-query',
 		'woocommerce/order-send-email',
+		'woocommerce/order-create',
 		'woocommerce/order-update',
 		'woocommerce/order-update-status',
 		'woocommerce/order-add-note',
@@ -313,6 +314,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'idempotent'  => false,
 				'destructive' => false,
 			),
+			'woocommerce/order-create'             => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => false,
+			),
 			'woocommerce/order-update'             => array(
 				'readonly'    => false,
 				'idempotent'  => false,
@@ -498,9 +504,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function test_order_status_input_schemas_exclude_checkout_draft(): void {
 		$query_schema  = wp_get_ability( 'woocommerce/orders-query' )->get_input_schema();
 		$update_schema = wp_get_ability( 'woocommerce/order-update-status' )->get_input_schema();
+		$create_schema = wp_get_ability( 'woocommerce/order-create' )->get_input_schema();
 
 		$this->assertNotContains( 'checkout-draft', $query_schema['properties']['status']['items']['enum'] );
 		$this->assertNotContains( 'checkout-draft', $update_schema['properties']['status']['enum'] ?? array() );
+		$this->assertNotContains( 'checkout-draft', $create_schema['properties']['status']['enum'] ?? array() );
 	}
 
 	/**
@@ -1007,6 +1015,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 					'id'    => 1,
 					'email' => 'invoice',
 				),
+			),
+			'order-create'           => array(
+				'woocommerce/order-create',
+				array( 'customer_note' => 'Denied' ),
 			),
 			'order-update'           => array(
 				'woocommerce/order-update',
