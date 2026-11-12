@@ -196,7 +196,7 @@ class ReadinessAbilities {
 		}
 		$result = $this->agent_readiness->check_product( $product );
 		if ( null === $result ) {
-			return new \WP_Error( 'woocommerce_agent_readiness_product_not_checked', __( 'Only published simple and variable products shown in the shop catalog are checked.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new \WP_Error( 'woocommerce_agent_readiness_product_not_checked', __( 'Only published simple and variable products not set to Hidden are checked.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		$rules  = $this->agent_readiness->get_default_rules();
@@ -321,7 +321,7 @@ class ReadinessAbilities {
 						),
 						'hidden_from_catalog' => array(
 							'type'        => 'integer',
-							'description' => __( 'Products not checked because the merchant hid them from the shop catalog.', 'woocommerce' ),
+							'description' => __( 'Products not checked because the merchant set them to Hidden.', 'woocommerce' ),
 						),
 						'unsupported_types'   => array(
 							'type'        => 'integer',
