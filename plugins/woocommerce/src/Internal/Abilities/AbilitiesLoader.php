@@ -29,6 +29,8 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\ProductReviewReply;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductReviewsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductReviewUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ShippingZonesQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\SystemStatusToolRun;
+use Automattic\WooCommerce\Internal\Abilities\Domain\SystemStatusToolsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\TaxRatesQuery;
 use Automattic\WooCommerce\Internal\AgentReadiness\ReportAbility;
 
@@ -71,6 +73,8 @@ class AbilitiesLoader {
 		ProductUpdate::class,
 		ReportAbility::class,
 		ShippingZonesQuery::class,
+		SystemStatusToolsQuery::class,
+		SystemStatusToolRun::class,
 		TaxRatesQuery::class,
 		CustomersQuery::class,
 	);
