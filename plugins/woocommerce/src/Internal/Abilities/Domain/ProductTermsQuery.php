@@ -74,9 +74,9 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 		$taxonomy = $input['taxonomy'];
 		if ( ! taxonomy_exists( $taxonomy ) ) {
 			// Let execute() tell a store manager that the attribute does not exist, rather than refuse access.
-			return wc_rest_check_manager_permissions( 'attributes', 'read' );
+			return (bool) wc_rest_check_manager_permissions( 'attributes', 'read' );
 		}
-		return wc_rest_check_product_term_permissions( $taxonomy, 'read' );
+		return (bool) wc_rest_check_product_term_permissions( $taxonomy, 'read' );
 	}
 
 	/**
