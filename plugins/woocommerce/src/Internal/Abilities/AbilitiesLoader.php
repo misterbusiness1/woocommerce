@@ -12,6 +12,8 @@ use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderNotesQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\OrderRefundCreate;
+use Automattic\WooCommerce\Internal\Abilities\Domain\OrderRefundsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderSendEmail;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
@@ -55,6 +57,8 @@ class AbilitiesLoader {
 		OrdersQuery::class,
 		OrderAddNote::class,
 		OrderNotesQuery::class,
+		OrderRefundsQuery::class,
+		OrderRefundCreate::class,
 		OrderSendEmail::class,
 		OrderUpdate::class,
 		OrderUpdateStatus::class,
@@ -126,7 +130,7 @@ class AbilitiesLoader {
 	 * @since 11.3.0
 	 */
 	public static function register_core_resources(): void {
-		foreach ( array( 'product', 'order', 'order_item', 'product_term', 'product_review', 'customer' ) as $resource_name ) {
+		foreach ( array( 'product', 'order', 'order_item', 'order_refund', 'product_term', 'product_review', 'customer' ) as $resource_name ) {
 			ExtensibleAbilities::register_resource( $resource_name );
 		}
 	}
